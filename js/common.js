@@ -1,8 +1,7 @@
-//Register the service worker as this is common js file for both htmls
+// Register the service worker as this is common js file for both htmls
 if ('serviceWorker' in navigator) {
  
     window.addEventListener('load', () => {
-      console.log("Service worker registering....");
       navigator.serviceWorker
         .register('../abc.js')
         .then(reg => console.log('Service Worker: Registered (pages)'))

@@ -1,7 +1,12 @@
 /**
  * Common database helper functions.
  */
+
+let db_name = "restaurants";
+let objectStoreName = "restaurantStore"
+
 class DBHelper {
+
 
 
  /**
@@ -9,29 +14,104 @@ class DBHelper {
    * Change this to restaurants.json file location on your server.
    */
   static get DATABASE_URL() {
-    const port = 8000 // Change this to your server port
-    return `http://localhost:${port}/data/restaurants.json`;
+  
+    const port = 1337 // Change this to your server port
+    return `http://localhost:${port}/restaurants`;
   }
+  // static updateOnlineStatus() {
+  //   debugger;
+  //   var condition = navigator.onLine ? "online" : "offline";
+  //   console.log("Condition : "+condition);
+  //   if(condition==="offline"){
+  //     this._dbPromise = openDatabase();
+  //     this._dbPromise.then(function(db) {
+  //       var transaction = db.transaction(objectStoreName, 'readonly');
+  //        var objectStore = transaction.objectStore(objectStoreName);
+      
+  //     var index = db.transaction(objectStoreName)
+  //     .objectStore(objectStoreName);
+
+  //   return index.getAll().then(function(restaurants) {
+  //     console.log("we are returning the indexeddb data..");
+  //     callback(null,restaurants);
+  //   });
+  //   });
+  // }else{
+  //   console.log("You are online, lets fetch the details from server");
+  //   fetch(DBHelper.DATABASE_URL)
+  //   .then((res)=> res.json())
+  //   .then((data) => {
+  //    callback(null, data);
+  //    console.log("inside fetch from server method");
+  //    //TODO: Task2 - Using IndexedDB API - store the restaurant object in objectStore
+  //    var dbPromise = openDatabase();
+  //    dbPromise.then(function(db) {
+  //     if (!db) return;
+  //    var tx = db.transaction(objectStoreName, 'readwrite');
+  //    var store = tx.objectStore(objectStoreName);
+  //    data.forEach(function(message) {
+    
+  //     store.put(message);
+  //     console.log("put restaurant in database  "+message.name);
+     
+  //   });
+  //   })      
+
+  // });
+  // }
+  // }
 
   /**
    * Fetch all restaurants.
    */
   static fetchRestaurants(callback) {
-    let xhr = new XMLHttpRequest();
+   
+    this._dbPromise = openDatabase();
+    this._dbPromise.then(function(db) {
+      var transaction = db.transaction(objectStoreName, 'readonly');
+       var objectStore = transaction.objectStore(objectStoreName);
+  
+      objectStore.count()
+      .then((res)=>{
+        var condition = navigator.onLine ? "online" : "offline";
+        if(res === 0){
+          console.log("conditon : "+condition);
+         if(condition ===  "online"){
+          fetch(DBHelper.DATABASE_URL)
+          .then((res)=> res.json())
+          .then((data) => {
+           callback(null, data);
+           var dbPromise = openDatabase();
+           dbPromise.then(function(db) {
+            if (!db) return;
+           var tx = db.transaction(objectStoreName, 'readwrite');
+           var store = tx.objectStore(objectStoreName);
+           data.forEach(function(message) {
+           store.put(message);
+          });
+          })      
+
+        });
+       }else{
+         alert("sorry! you are offline. Please connect to internet to ");
+       }   }else{
+          //there is data in index db fetch it
+          
+      var index = db.transaction(objectStoreName)
+      .objectStore(objectStoreName);
+
+    return index.getAll().then(function(restaurants) {
+      console.log("we are returning the indexeddb data..");
+      callback(null,restaurants);
+    });
+        }
     
-    xhr.open('GET', DBHelper.DATABASE_URL);
-    xhr.onload = () => {
-      if (xhr.status === 200) { // Got a success response from server!
-        const json = JSON.parse(xhr.responseText);
-        const restaurants = json.restaurants;
-        callback(null, restaurants);
-      } else { // Oops!. Got an error from server.
-        const error = (`Request failed. Returned status of ${xhr.status}`);
-        callback(error, null);
-      }
-    };
-    xhr.send();
+    });
+  });
   }
+    
+
+ 
 
   /**
    * Fetch a restaurant by its ID.
@@ -152,7 +232,12 @@ class DBHelper {
    * Restaurant image URL.
    */
   static imageUrlForRestaurant(restaurant) {
-    return (`/img/${restaurant.photograph}`);
+    var photograph = restaurant.photograph;
+
+   if(photograph === undefined){
+    photograph = 10;
+   }
+    return (`/img/${photograph}.jpg`);
   }
 
   /**
@@ -181,3 +266,15 @@ class DBHelper {
 
 }
 
+function openDatabase() {
+  // If the browser doesn't support service worker,
+  // we don't care about having a database
+  if (!navigator.serviceWorker) {
+    return Promise.resolve();
+  }
+
+  return idb.open(db_name, 1, function(upgradeDb) {
+    var store = upgradeDb.createObjectStore(objectStoreName, {keyPath: 'id'});
+    
+  });
+}
