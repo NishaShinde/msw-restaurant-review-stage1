@@ -18,48 +18,6 @@ class DBHelper {
     const port = 1337 // Change this to your server port
     return `http://localhost:${port}/restaurants`;
   }
-  // static updateOnlineStatus() {
-  //   debugger;
-  //   var condition = navigator.onLine ? "online" : "offline";
-  //   console.log("Condition : "+condition);
-  //   if(condition==="offline"){
-  //     this._dbPromise = openDatabase();
-  //     this._dbPromise.then(function(db) {
-  //       var transaction = db.transaction(objectStoreName, 'readonly');
-  //        var objectStore = transaction.objectStore(objectStoreName);
-      
-  //     var index = db.transaction(objectStoreName)
-  //     .objectStore(objectStoreName);
-
-  //   return index.getAll().then(function(restaurants) {
-  //     console.log("we are returning the indexeddb data..");
-  //     callback(null,restaurants);
-  //   });
-  //   });
-  // }else{
-  //   console.log("You are online, lets fetch the details from server");
-  //   fetch(DBHelper.DATABASE_URL)
-  //   .then((res)=> res.json())
-  //   .then((data) => {
-  //    callback(null, data);
-  //    console.log("inside fetch from server method");
-  //    //TODO: Task2 - Using IndexedDB API - store the restaurant object in objectStore
-  //    var dbPromise = openDatabase();
-  //    dbPromise.then(function(db) {
-  //     if (!db) return;
-  //    var tx = db.transaction(objectStoreName, 'readwrite');
-  //    var store = tx.objectStore(objectStoreName);
-  //    data.forEach(function(message) {
-    
-  //     store.put(message);
-  //     console.log("put restaurant in database  "+message.name);
-     
-  //   });
-  //   })      
-
-  // });
-  // }
-  // }
 
   /**
    * Fetch all restaurants.
